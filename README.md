@@ -8,6 +8,30 @@ This occurs when the main thread is busy, but not maxed out. (You may need to ad
 
 React does not preserve any state for renders that got suspended before they were able to mount for the first time. When the component has loaded, React will retry rendering the suspended tree from scratch. (see the [official doc](https://react.dev/reference/react/Suspense#:~:text=React%20does%20not%20preserve%20any%20state%20for%20renders%20that%20got%20suspended%20before%20they%20were%20able%20to%20mount%20for%20the%20first%20time.%20When%20the%20component%20has%20loaded%2C%20React%20will%20retry%20rendering%20the%20suspended%20tree%20from%20scratch.))
 
+Normally, React displays UI in three phases:
+
+1. **Triggering** a render (delivering the guest’s order to the kitchen)
+2. **Rendering** the component (preparing the order in the kitchen)
+3. **Committing** to the DOM (placing the order on the table)
+
+![render and commit](./render-and-commit.png)
+
+However, this flow changes for a **suspended tree**. When a component suspends, React may start rendering but then **discard the work before commit**. As a result, the render phase can run **from one to an unbounded number of times** before any commit happens. This leads to prolonged loading states and a poor user experience.
+
+![render and discard](./render-and-discard.png)
+
+This is usually not an issue on modern, high-performance devices. However, on lower-end or resource-constrained devices, it can become a serious problem. Based on my observations, if the render phase of a suspended tree takes on the order of **1 to 3 seconds**, React is much more likely to **discard the work and retry**, significantly increasing the perceived loading time.
+
+![bermuda triangle for suspended tree](./bermuda-triangle-for-suspended-tree.png)
+
+## Succeeds on the first load, but fails on subsequent attempts
+
+In some cases, a suspended tree may load successfully the first time, but fail on subsequent attempts. There are several possible reasons for this behavior:
+
+1. On the first load, the render path is **segmented by fetching split chunks** (for code splitting).
+2. On the first load, the render path is **segmented by API requests** (to fetch server data).
+3. On the first load, the render path may take **more than 3 seconds**, but on subsequent loads it completes within **1–3 seconds**, making it more likely to fall into the range where React discards and retries suspended work.
+
 # Solutions
 
 ## Use `useEffect` for heavy work
