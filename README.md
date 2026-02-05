@@ -39,6 +39,8 @@ function Bar() {
 }
 ```
 
+This would not work if the load comes from many small components rather than a few heavy computations.
+
 ## Reveal the `children` after commit
 
 ```diff
@@ -63,3 +65,9 @@ function RevealAfterCommit(props: { children: ReactNode }) {
   return props.children;
 }
 ```
+
+This increases the number of commit phases for suspended components linearly.
+
+From: trigger → render A → render B → commit
+
+To: trigger → render A → commit → render B → commit
