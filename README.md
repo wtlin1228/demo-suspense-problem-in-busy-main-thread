@@ -1,8 +1,12 @@
-This occurs when the main thread is busy, but not maxed out.
+This occurs when the main thread is busy, but not maxed out. (You may need to adjust the `fib(n)` in `<Bar>` and `<Timer>` depending on your CPU performance.)
 
 ![multiple bar fib](./multiple-bar-fib.png)
 
 ![performance record](./performance-record.png)
+
+# Why this happens
+
+React does not preserve any state for renders that got suspended before they were able to mount for the first time. When the component has loaded, React will retry rendering the suspended tree from scratch. (see the [official doc](https://react.dev/reference/react/Suspense#:~:text=React%20does%20not%20preserve%20any%20state%20for%20renders%20that%20got%20suspended%20before%20they%20were%20able%20to%20mount%20for%20the%20first%20time.%20When%20the%20component%20has%20loaded%2C%20React%20will%20retry%20rendering%20the%20suspended%20tree%20from%20scratch.))
 
 # Solutions
 
